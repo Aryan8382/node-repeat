@@ -1,15 +1,34 @@
 const express = require("express");
 const db = require("./config/db");
 const User = require("./model/UserModel");
+const path = require("path");
 
+// Express app banaya (server start karne ke liye)
 const app = express();
 
+// JSON data ko read karne ke liye enable kiya
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Server is working!");
-});
+// EJS set kiya (HTML pages dynamic banane ke liye)
+app.set("view engine", "ejs");
 
+// Views folder ka path set kiya (jahan HTML/EJS files hoti hain)
+app.set("views", path.join(__dirname, "views"));
+
+// Public folder ko open kiya (CSS, JS, images yahan se load honge)
+app.use(express.static("public"));
+  
+app.get("/", async (req, res) => {
+  try {
+    const users = await User.find();
+    console.log(users);
+
+    res.render("index", { users });
+  } catch (err) {
+    console.log(err);
+    res.send("Error loading page");
+  }
+});
 app.post("/User", async (req, res) => {
   try {
     const { username, password } = req.body;
